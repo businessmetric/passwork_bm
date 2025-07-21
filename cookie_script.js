@@ -1,6 +1,49 @@
+
+
+
 const thisHostname = document.location.hostname;
 const cookieExpiration = new Date(+new Date() + 1000 * 60 * 60 * 24 * 30 * 24);
 const thisDomain = getDomain_(thisHostname);
+
+function ownDomainFunc(domain_from_referer) {
+    var ownDomainArr = [
+        'passwork.pro',
+        'passwork.com',
+        'passwork.ru'
+    ];
+    return ownDomainArr.indexOf(domain_from_referer) > -1;
+}
+
+function getDomain_(url) {
+    if (!url) return;
+    var a = document.createElement('a');
+    a.href = url;
+    try {
+        return a.hostname.match(/[^.]*\.[^.]{2,3}(?:\.[^.]{2,3})?$/)[0];
+    } catch (squelch) {}
+}
+
+function mapUtmSourceMedium(source, medium) {
+    // Можно расширить конфиг для маппинга
+    const mapping = {
+        'google': {
+            'organic': 'google / organic',
+            'cpc': 'google / cpc',
+        },
+        'yandex': {
+            'organic': 'yandex / organic',
+            'cpc': 'yandex / cpc',
+        },
+        'bing': {
+            'organic': 'bing / organic',
+            'cpc': 'bing / cpc',
+        }
+    };
+    if (mapping[source] && mapping[source][medium]) {
+        return mapping[source][medium];
+    }
+    return source + ' / ' + medium;
+}
 function writeCookie_(name, value, expiration, path, domain) {
             var str = name + '=' + value + ';';
             if (expiration) str += 'Expires=' + expiration.toUTCString() + ';';
