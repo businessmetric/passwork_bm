@@ -1,5 +1,7 @@
 
 
+
+
 // Конфиг для логирования
 const DEBUG_CONFIG = {
     enableDebug: true // переключатель логов
@@ -607,11 +609,16 @@ function setSourceCookie() {
 
  
     // DIRECT
-    // Условия, если домен первого уровня + зона соответствуют нашему домену domain_name то пишем следующие значения DIRECT
-    /// else if this our domain then Direct
+    // Если заход с собственного домена и кука last_utm_source отсутствует, записываем direct
     else if (ownDomain) {
       var cookieValue = "utmcsr=" + 'direct' + "|" + "utmcmd=" + '(not set)' + "|" + "utmccn=" + '(not set)' + "|" + "utmcct=" + '(not set)' + "|" + "utmctr=" + '(not set)' + "|" + "utmhostname=" + sub_domain_name; // Value of your cookie
       fullCookieValue = cookieName + "=" +cookieValue+"; path=/; domain=." + location.hostname.replace(/^www\./i, "") + expirationCookie; // Sets cookie for all subdomains    
+      var last_utm_source = getCookie(cookieName);
+      if (last_utm_source == null) {
+        document.cookie = fullCookieValue;
+        logDebug('First own domain visit: cookie set as direct');
+        return true;
+      }
     }
  
     // не DIRECT
