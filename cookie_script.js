@@ -600,25 +600,25 @@ function setSourceCookie() {
 
     var fullCookieValue = cookieName + "=direct; path=/; domain=." + location.hostname.replace(/^www\./i, "") + expirationCookie; // Sets cookie for all subdomains
    
-    // не DIRECT
-    // Условие, если в URL замечается текст "utm_source" или "utm_source", то мы с этими значениями записываем куки
-    if (params.get('utm_source') != undefined || params.get('utm_medium') != undefined || params.get('utm_campaign') != undefined){
-      var cookieValue = "utmcsr=" + params.get('utm_source') + "|" + "utmcmd=" + params.get('utm_medium') + "|" + "utmccn=" + params.get('utm_campaign') + "|" + "utmcct=" + params.get('utm_content') + "|" + "utmctr=" + params.get('utm_term') + "|" + "utmhostname=" + sub_domain_name; // Value of your cookie
-      fullCookieValue = cookieName + "=" +cookieValue+"; path=/; domain=." + location.hostname.replace(/^www\./i, "") + expirationCookie; // Sets cookie for all subdomains      
+    // UTM always has priority
+    if (params.get('utm_source') != undefined || params.get('utm_medium') != undefined || params.get('utm_campaign') != undefined) {
+      var cookieValue = "utmcsr=" + (params.get('utm_source') || '(not set)') + "|" +
+        "utmcmd=" + (params.get('utm_medium') || '(not set)') + "|" +
+        "utmccn=" + (params.get('utm_campaign') || '(not set)') + "|" +
+        "utmcct=" + (params.get('utm_content') || '(not set)') + "|" +
+        "utmctr=" + (params.get('utm_term') || '(not set)') + "|" +
+        "utmhostname=" + sub_domain_name;
+      fullCookieValue = cookieName + "=" + cookieValue + "; path=/; domain=." + location.hostname.replace(/^www\./i, "") + expirationCookie;
+      document.cookie = fullCookieValue;
+      logDebug('UTM params detected, cookie set:', fullCookieValue);
     }
-
- 
     // DIRECT
-    // Если заход с собственного домена и кука last_utm_source отсутствует, записываем direct
+    // Если заход с собственного домена, записываем direct
     else if (ownDomain) {
-      var cookieValue = "utmcsr=" + 'direct' + "|" + "utmcmd=" + '(not set)' + "|" + "utmccn=" + '(not set)' + "|" + "utmcct=" + '(not set)' + "|" + "utmctr=" + '(not set)' + "|" + "utmhostname=" + sub_domain_name; // Value of your cookie
-      fullCookieValue = cookieName + "=" +cookieValue+"; path=/; domain=." + location.hostname.replace(/^www\./i, "") + expirationCookie; // Sets cookie for all subdomains    
-      var last_utm_source = getCookie(cookieName);
-      if (last_utm_source == null) {
-        document.cookie = fullCookieValue;
-        logDebug('First own domain visit: cookie set as direct');
-        return true;
-      }
+      var cookieValue = "utmcsr=direct|utmcmd=(not set)|utmccn=(not set)|utmcct=(not set)|utmctr=(not set)|utmhostname=" + sub_domain_name;
+      fullCookieValue = cookieName + "=" + cookieValue + "; path=/; domain=." + location.hostname.replace(/^www\./i, "") + expirationCookie;
+      document.cookie = fullCookieValue;
+      logDebug('Own domain visit, cookie set as direct:', fullCookieValue);
     }
  
     // не DIRECT
